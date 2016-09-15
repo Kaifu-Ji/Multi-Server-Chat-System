@@ -1,5 +1,10 @@
 package com.server;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class ClientInfo
@@ -8,7 +13,9 @@ public class ClientInfo
 	String Room;
 	String RoomOnwed;
 	Socket clientSocket;
-	
+	BufferedWriter writer;
+	BufferedReader reader;
+
 	public ClientInfo(String clientName, String room, String roomOnwed, Socket clientSocket)
 	{
 		super();
@@ -16,5 +23,29 @@ public class ClientInfo
 		Room = room;
 		RoomOnwed = roomOnwed;
 		this.clientSocket = clientSocket;
+		try
+		{
+			reader = new BufferedReader(
+					new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+			writer = new BufferedWriter(
+					new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+//	public synchronized boolean readyToRead() throws IOException
+//	{
+//		return reader.ready();
+//	}
+	public synchronized String read() throws IOException
+	{
+		if (reader.ready())
+		{
+			return reader.readLine();
+		}
+		return null;
 	}
 }

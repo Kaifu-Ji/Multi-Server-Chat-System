@@ -26,7 +26,9 @@ public class ServerMain
 
 	private void work()
 	{
-		
+		new NewClientAcceptor(4444).start();
+		new SeverMessageResponsorMain(5555).start();
+		new ClientMessageReader().start();
 	}
 
 	public ServerMain()
@@ -42,7 +44,7 @@ public class ServerMain
 		while (info != null)
 		{
 			String[] temp = info.split("\t");
-			if (temp[0] != this.serverName)
+			if (!temp[0].equals(this.serverName))
 			{
 				ServerInfo serverInfo = new ServerInfo(temp[0], temp[1], Integer.parseInt(temp[2]),
 						Integer.parseInt(temp[3]));
@@ -52,6 +54,7 @@ public class ServerMain
 		}
 		ServerManager.getInstance().setMyname(serverName);
 		configReader.close();
+		RoomManager.getInstance().createRoom("MainHall-"+serverName);
 	}
 
 }

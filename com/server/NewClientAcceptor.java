@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -43,6 +42,7 @@ public class NewClientAcceptor extends Thread
 			while (!stop)
 			{
 				clientSocket = serverSocket.accept();
+				System.out.println(ServerManager.getInstance().myname+"accept a new client");
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
 				String message = reader.readLine();
@@ -97,6 +97,7 @@ public class NewClientAcceptor extends Thread
 				new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
 		if (ClientManager.getInstance().nameExist(name) || (!nameCheck(name)))
 		{
+			System.out.println("unvalue name");
 			clientWriter.write(JsonOperator.responseNewIdentity(name, false));
 			clientWriter.newLine();
 			clientWriter.flush();
@@ -105,9 +106,11 @@ public class NewClientAcceptor extends Thread
 		ArrayList<ServerInfo> serverList = ServerManager.getInstance().getList();
 		String message = JsonOperator.lockMessage(name, ServerManager.getInstance().getMyName());
 		boolean approved = true;
+		ArrayList<Socket> socketList = new ArrayList<>();
 		for (ServerInfo serverInfo : serverList)
 		{
 			Socket socket = new Socket(serverInfo.address, serverInfo.portForServer);
+			socketList.add(socket);
 			BufferedWriter serverWriter = new BufferedWriter(
 					new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
 			serverWriter.write(message);
@@ -116,16 +119,36 @@ public class NewClientAcceptor extends Thread
 			BufferedReader serverReader = new BufferedReader(
 					new InputStreamReader(socket.getInputStream(), "UTF-8"));
 			String response = serverReader.readLine();
-			approved &= ((String)new JsonOperator(response).get("locked")).equals("true");
+			approved &= ((String) new JsonOperator(response).get("locked")).equals("true");
+		}
+		for (Socket socket : socketList)
+		{
+			BufferedWriter serverWriter = new BufferedWriter(
+					new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
+			message = JsonOperator.releaseIdentity(name, ServerManager.getInstance().getMyName());
+			serverWriter.write(message);
+			serverWriter.newLine();
+			serverWriter.flush();
+			serverWriter.close();
+			socket.close();
 		}
 		clientWriter.write(JsonOperator.responseNewIdentity(name, approved));
 		clientWriter.newLine();
 		clientWriter.flush();
-		if(approved)
+		if (approved)
 		{
-			
+			String mainRoom = "MainHall-" + ServerManager.getInstance().getMyName();
+			ClientInfo newClient = new ClientInfo(name,
+					mainRoom, null, clientSocket);
+			ClientManager.getInstance().addClient(name, newClient);
+			RoomManager.getInstance().joinRoom(name, mainRoom);
+			clientWriter.write(JsonOperator.roomChange(name,"", mainRoom));
+			clientWriter.newLine();
+			clientWriter.flush();
+		}else {
+			clientWriter.close();
+			clientSocket.close();
 		}
-		
 
 	}
 }
