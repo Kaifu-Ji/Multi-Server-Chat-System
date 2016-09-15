@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,11 +13,20 @@ public class test
 
 	public static void main(String[] args) throws IOException
 	{
-		File f = new File("servers_conf.txt");
-		BufferedReader configReader = new BufferedReader(new FileReader(f));
-		String info = configReader.readLine();
-		System.out.println(info);
+		ArrayList<String> a = new ArrayList<>();
+		a.add("sss");
+		a.add("ddd");
+		String [] t = new String[1];
+		String[] s =  a.toArray(t);
+		for (String string : s)
+		{
+			System.out.println(string);
+		}
 
+		for (String string : t)
+		{
+			System.out.println(string);
+		}
 	}
 
 }

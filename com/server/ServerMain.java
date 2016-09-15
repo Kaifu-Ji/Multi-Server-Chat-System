@@ -10,7 +10,7 @@ public class ServerMain
 	String serverName;
 	int processThreadNumber;
 
-	public ServerMain(String serverName,int threadNumber)
+	public ServerMain(String serverName, int threadNumber)
 	{
 		super();
 		this.serverName = serverName;
@@ -19,7 +19,7 @@ public class ServerMain
 
 	public static void main(String[] args) throws IOException
 	{
-		ServerMain serverMain = new ServerMain("s1",1);
+		ServerMain serverMain = new ServerMain("s1", 1);
 		serverMain.setup();
 		serverMain.work();
 	}
@@ -29,6 +29,7 @@ public class ServerMain
 		new NewClientAcceptor(4444).start();
 		new SeverMessageResponsorMain(5555).start();
 		new ClientMessageReader().start();
+		new ClientMessageProcessor().start();
 	}
 
 	public ServerMain()
@@ -44,17 +45,18 @@ public class ServerMain
 		while (info != null)
 		{
 			String[] temp = info.split("\t");
-			if (!temp[0].equals(this.serverName))
+			if (!temp[0].equals(this.serverName)&&info.charAt(0) != '#')
 			{
 				ServerInfo serverInfo = new ServerInfo(temp[0], temp[1], Integer.parseInt(temp[2]),
 						Integer.parseInt(temp[3]));
 				ServerManager.getInstance().addServer(serverInfo);
+				RoomManager.getInstance().addRemoteRoom("MainHall-" + temp[0], temp[0]);
 			}
 			info = configReader.readLine();
 		}
 		ServerManager.getInstance().setMyname(serverName);
 		configReader.close();
-		RoomManager.getInstance().createRoom("MainHall-"+serverName);
+		RoomManager.getInstance().createRoom("MainHall-" + serverName);
 	}
 
 }

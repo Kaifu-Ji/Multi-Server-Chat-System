@@ -3,7 +3,7 @@ package com.server;
 public class Message
 {
 	JsonOperator jsonOperator;
-	String identiyt;
+	String identity;
 	
 	public Message(String jsonString, String identiyt)
 	{
@@ -11,7 +11,7 @@ public class Message
 		try
 		{
 			this.jsonOperator = new JsonOperator(jsonString);
-			this.identiyt = identiyt;
+			this.identity = identiyt;
 		} catch (Exception e)
 		{
 			// TODO: handle exception

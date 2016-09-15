@@ -1,5 +1,6 @@
 package com.server;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -73,6 +74,19 @@ public class JsonOperator
 		jb.put("serverid", serverName);
 		jb.put("identity", clientName);
 		jb.put("locked", approved? "true" : "false");
+		return jb.toJSONString();
+	}
+	
+	public static String constructList(String[] rooms)
+	{
+		JSONObject jb = new JSONObject();
+		JSONArray room = new JSONArray();
+		for (String s : rooms)
+		{
+			room.add(s);
+		}
+		jb.put("type", "roomlist");
+		jb.put("rooms", room);
 		return jb.toJSONString();
 	}
 

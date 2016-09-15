@@ -48,4 +48,18 @@ public class ClientInfo
 		}
 		return null;
 	}
+	public void write(String message)
+	{
+		try
+		{
+			writer.write(message);
+			writer.newLine();
+			writer.flush();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 }
