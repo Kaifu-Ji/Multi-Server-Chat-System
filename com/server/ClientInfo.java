@@ -10,7 +10,7 @@ import java.net.Socket;
 public class ClientInfo
 {
 	String clientName;
-	String Room;
+	String room;
 	String RoomOnwed;
 	Socket clientSocket;
 	BufferedWriter writer;
@@ -20,7 +20,7 @@ public class ClientInfo
 	{
 		super();
 		this.clientName = clientName;
-		Room = room;
+		this.room = room;
 		RoomOnwed = roomOnwed;
 		this.clientSocket = clientSocket;
 		try

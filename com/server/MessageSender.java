@@ -21,7 +21,7 @@ public class MessageSender extends Thread
 	{
 		switch (task)
 		{
-		case "responese":
+		case "response":
 			responseClient(client, message);
 			break;
 

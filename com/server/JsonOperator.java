@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 @SuppressWarnings("unchecked")
 public class JsonOperator
 {
@@ -57,7 +58,8 @@ public class JsonOperator
 		jb.put("identity", clientName);
 		return jb.toJSONString();
 	}
-	public static String roomChange(String clientname,String from,String to)
+
+	public static String roomChange(String clientname, String from, String to)
 	{
 		JSONObject result = new JSONObject();
 		result.put("type", "roomchange");
@@ -67,16 +69,17 @@ public class JsonOperator
 		return result.toJSONString();
 	}
 
-	public static String responseLockIdentity(String clientName,String serverName,boolean approved)
+	public static String responseLockIdentity(String clientName, String serverName,
+			boolean approved)
 	{
 		JSONObject jb = new JSONObject();
 		jb.put("type", "lockidentity");
 		jb.put("serverid", serverName);
 		jb.put("identity", clientName);
-		jb.put("locked", approved? "true" : "false");
+		jb.put("locked", approved ? "true" : "false");
 		return jb.toJSONString();
 	}
-	
+
 	public static String constructList(String[] rooms)
 	{
 		JSONObject jb = new JSONObject();
@@ -87,6 +90,25 @@ public class JsonOperator
 		}
 		jb.put("type", "roomlist");
 		jb.put("rooms", room);
+		return jb.toJSONString();
+	}
+
+	/*
+	 * { "type" : "roomcontents", "roomid" : "jokes", "identities" :
+	 * ["Adel","Chenhao","Maria"], "owner" : "Adel" }
+	 */
+	public static String who(String[] clientInRoom, String roomName, String roomOnwer)
+	{
+		JSONObject jb = new JSONObject();
+		JSONArray clientsInRoom = new JSONArray();
+		for (String client : clientInRoom)
+		{
+			clientsInRoom.add(client);
+		}
+		jb.put("type", "roomcontents");
+		jb.put("roomid", roomName);
+		jb.put("identities", clientsInRoom);
+		jb.put("owner", roomOnwer);
 		return jb.toJSONString();
 	}
 

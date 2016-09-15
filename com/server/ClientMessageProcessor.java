@@ -20,6 +20,10 @@ public class ClientMessageProcessor extends Thread
 					break;
 				case "quit":
 					quit(message);
+					break;
+				case "who":
+					who(message);
+					break;
 				default:
 					break;
 				}
@@ -30,17 +34,25 @@ public class ClientMessageProcessor extends Thread
 			}
 		}
 	}
+	
+	private void who(Message m)
+	{
+		ClientInfo clientInfo = ClientManager.getInstance().getClient(m.identity);
+		RoomInfo room = RoomManager.getInstance().getRoom(clientInfo.room);
+		String messageSend = JsonOperator.who(room.listClients(), room.roomName, room.roomOwner);
+		new MessageSender("response", messageSend, null, m.identity).run();
+	}
 
 	private void list(Message m)
 	{
 		String messageSend = JsonOperator.constructList(RoomManager.getInstance().roomList());
-		new MessageSender("responese", messageSend, null, m.identity).run();
+		new MessageSender("response", messageSend, null, m.identity).run();
 	}
 
 	private void quit(Message m)
 	{
 		String messageSend = JsonOperator.roomChange(m.identity,
-				ClientManager.getInstance().getClient(m.identity).Room, "");
-		new MessageSender("responese", messageSend, null, m.identity).run();
+				ClientManager.getInstance().getClient(m.identity).room, "");
+		new MessageSender("response", messageSend, null, m.identity).run();
 	}
 }

@@ -27,6 +27,10 @@ public class RoomManager
 		}
 		return instance;
 	}
+	public RoomInfo getRoom(String roomName)
+	{
+		return roomList.get(roomName);
+	}
 
 	public void addRemoteRoom(String roomName, String remoteServer)
 	{
@@ -50,9 +54,9 @@ public class RoomManager
 		room.addClient(clientName);
 	}
 
-	public void createRoom(String roomName)
+	public void createRoom(String roomName,String roomOwner)
 	{
-		RoomInfo room = new RoomInfo(roomName);
+		RoomInfo room = new RoomInfo(roomName,roomOwner);
 		synchronized (roomList)
 		{
 			roomList.put(roomName, room);
