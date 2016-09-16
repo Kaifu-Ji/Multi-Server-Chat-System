@@ -37,16 +37,77 @@ public class ClientMessageProcessor extends Thread
 				case "join":
 					joinRoom(message);
 					break;
-				case"":
+				case "deleteroom":
+					deleteRoom(message);
+					break;
+				case "message":
+					message(message);
+					break;
 				default:
 					break;
 				}
 			} catch (InterruptedException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void message(Message message)
+	{
+		String clientName = message.identity;
+		String roomName = ClientManager.getInstance().getClient(clientName).room;
+		String messageSend = JsonOperator.message(message.jsonOperator,clientName);
+		new MessageSender("roomBroadcast", messageSend, roomName, clientName).start();
+	}
+
+	private void deleteRoom(Message message)
+	{
+		String clientName = message.identity;
+		String roomToDelete = message.jsonOperator.get("roomid");
+		ClientInfo client = ClientManager.getInstance().getClient(clientName);
+		//System.out.println(roomToDelete +"|"+ clientName);
+		if (client.roomOnwed == null||!client.roomOnwed.equals(roomToDelete))
+		{
+			String messageSend = JsonOperator.deleteRoom(roomToDelete, false);
+			new MessageSender("response", messageSend, null, clientName).start();
+			return;
+		}
+		String mainRoom = "MainHall-" + ServerManager.getInstance().getMyName();
+		String[] clientInRoom = RoomManager.getInstance().getRoom(roomToDelete).listClients();
+		for (String clientname : clientInRoom)
+		{
+			String messageSend = JsonOperator.roomChange(clientname, roomToDelete, mainRoom);
+			new MessageSender("response", messageSend, null, clientname).start();
+			new MessageSender("roomBroadcast", messageSend, mainRoom, clientname).start();
+			RoomManager.getInstance().leaveRoom(clientname, roomToDelete);
+			RoomManager.getInstance().joinRoom(clientname, mainRoom);
+			client = ClientManager.getInstance().getClient(clientname);
+			client.changeRoom(mainRoom);
+		}
+		RoomManager.getInstance().deleteRoom(roomToDelete);
+		String messageSend = JsonOperator.broadcastDeleteRoom(roomToDelete,
+				ServerManager.getInstance().getMyName());
+		ArrayList<ServerInfo> serverList = ServerManager.getInstance().getList();
+		try
+		{
+			for (ServerInfo serverInfo : serverList)
+			{
+				Socket socket = new Socket(serverInfo.address, serverInfo.portForServer);
+				BufferedWriter serverWriter = new BufferedWriter(
+						new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
+				serverWriter.write(messageSend);
+				serverWriter.newLine();
+				serverWriter.flush();
+				serverWriter.close();
+				socket.close();
+			}
+		} catch (Exception e)
+		{
+			// TODO: handle exception
+		}
+		messageSend = JsonOperator.deleteRoom(roomToDelete, true);
+		new MessageSender("response", messageSend, null, clientName).start();
 	}
 
 	private void joinRoom(Message message)
@@ -54,14 +115,15 @@ public class ClientMessageProcessor extends Thread
 		String clientName = message.identity;
 		String roomName = message.jsonOperator.get("roomid");
 		String currentRoom = ClientManager.getInstance().getClient(clientName).room;
-		String serverName =  RoomManager.getInstance().hasRoom(roomName);
-		if(serverName == null)
+		String serverName = RoomManager.getInstance().hasRoom(roomName);
+		if (serverName == null)
 		{
 			String messageSend = JsonOperator.roomChange(clientName, currentRoom, currentRoom);
-			new MessageSender("response", messageSend, roomName, clientName).start();;
+			new MessageSender("response", messageSend, roomName, clientName).start();
+			;
 			return;
 		}
-		if(serverName.equals(ServerManager.getInstance().getMyName()))
+		if (serverName.equals(ServerManager.getInstance().getMyName()))
 		{
 			String messageSend = JsonOperator.roomChange(clientName, currentRoom, roomName);
 			new MessageSender("roomBroadcast", messageSend, currentRoom, clientName).start();
@@ -88,7 +150,8 @@ public class ClientMessageProcessor extends Thread
 		{
 			System.out.println("unvalue room name");
 			String messageSend = JsonOperator.createRoom(roomName, false);
-			new MessageSender("response", messageSend, null, roomOwner).start();;
+			new MessageSender("response", messageSend, null, roomOwner).start();
+			;
 			return;
 		}
 		ArrayList<ServerInfo> serverList = ServerManager.getInstance().getList();
@@ -111,12 +174,13 @@ public class ClientMessageProcessor extends Thread
 						new InputStreamReader(socket.getInputStream(), "UTF-8"));
 				String response = serverReader.readLine();
 				approved &= ((String) new JsonOperator(response).get("locked")).equals("true");
-			} 
+			}
 			for (Socket socket : socketList)
 			{
 				BufferedWriter serverWriter = new BufferedWriter(
 						new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
-				messageSendtoServer = JsonOperator.releaseRoomID(ServerManager.getInstance().getMyName(), roomName, approved);
+				messageSendtoServer = JsonOperator
+						.releaseRoomID(ServerManager.getInstance().getMyName(), roomName, approved);
 				serverWriter.write(messageSendtoServer);
 				serverWriter.newLine();
 				serverWriter.flush();

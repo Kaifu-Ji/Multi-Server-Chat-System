@@ -110,6 +110,10 @@ class SeverMessageResponsorThread extends Thread
 					}
 					stop = true;
 					break;
+				case "deleteroom":
+					roomName = jsonOperator.get("roomid");
+					RoomManager.getInstance().deleteRemoteRoom(roomName);
+					break;
 				default:
 					break;
 				}

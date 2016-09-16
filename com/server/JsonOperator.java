@@ -172,6 +172,31 @@ public class JsonOperator
 		jb.put("serverid", myName);
 		return jb.toJSONString();
 	}
+
+	public static String deleteRoom(String roomToDelete, boolean b)
+	{
+		JSONObject jb = new JSONObject();
+		jb.put("type", "deleteroom");
+		jb.put("approved", b?"true":"false");
+		jb.put("roomid", roomToDelete);
+		return jb.toJSONString();
+	}
+
+	public static String broadcastDeleteRoom(String roomToDelete, String serverName)
+	{
+		JSONObject jb = new JSONObject();
+		jb.put("type", "deleteroom");
+		jb.put("serverid",serverName);
+		jb.put("roomid", roomToDelete);
+		return jb.toJSONString();
+	}
+
+	public static String message(JsonOperator jsonOperator, String clientName)
+	{
+		JSONObject jb = jsonOperator.job;
+		jb.put("identity", clientName);
+		return jb.toJSONString();
+	}
 	
 
 }

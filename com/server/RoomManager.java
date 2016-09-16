@@ -27,6 +27,12 @@ public class RoomManager
 		}
 		return instance;
 	}
+	
+	public synchronized void deleteRoom(String roomName)
+	{
+		roomList.remove(roomName);
+		roomNames.remove(roomName);
+	}
 
 	public synchronized RoomInfo getRoom(String roomName)
 	{
@@ -58,6 +64,18 @@ public class RoomManager
 		synchronized (remoteRooms)
 		{
 			remoteRooms.put(roomName, remoteServer);
+		}
+	}
+	
+	public void deleteRemoteRoom(String roomName)
+	{
+		synchronized(roomNames)
+		{
+			roomNames.remove(roomName);
+		}
+		synchronized (remoteRooms)
+		{
+			remoteRooms.remove(roomName);
 		}
 	}
 
