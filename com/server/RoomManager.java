@@ -31,6 +31,22 @@ public class RoomManager
 	{
 		return roomList.get(roomName);
 	}
+	
+	public void lockRoom(String roomName)
+	{
+		synchronized(lockRoom)
+		{
+			lockRoom.add(roomName);
+		}
+	}
+	
+	public void removeLockRoom(String roomName)
+	{
+		synchronized (lockRoom)
+		{
+			lockRoom.remove(roomName);
+		}
+	}
 
 	public void addRemoteRoom(String roomName, String remoteServer)
 	{
@@ -65,6 +81,10 @@ public class RoomManager
 		{
 			roomNames.add(roomName);
 		}
+	}
+	public boolean roomExist(String roomName)
+	{
+		return (roomList.containsKey(roomName)||lockRoom.contains(roomName));
 	}
 
 	public String[] roomList()

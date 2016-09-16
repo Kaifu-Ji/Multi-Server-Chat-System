@@ -41,12 +41,21 @@ public class JsonOperator
 		return jb.toJSONString();
 	}
 
-	public static String lockMessage(String clientName, String serverName)
+	public static String lockIdentity(String clientName, String serverName)
 	{
 		JSONObject jb = new JSONObject();
 		jb.put("type", "lockidentity");
 		jb.put("serverid", serverName);
 		jb.put("identity", clientName);
+		return jb.toJSONString();
+	}
+
+	public static String lockRoom(String roomName, String serverName)
+	{
+		JSONObject jb = new JSONObject();
+		jb.put("type", "lockroomid");
+		jb.put("serverid", serverName);
+		jb.put("roomid", roomName);
 		return jb.toJSONString();
 	}
 
@@ -56,6 +65,18 @@ public class JsonOperator
 		jb.put("type", "releaseidentity");
 		jb.put("serverid", serverName);
 		jb.put("identity", clientName);
+		return jb.toJSONString();
+	}
+
+	// {"type" : "releaseroomid", "serverid" : "s1", "roomid" : "jokes",
+	// "approved":"true"}
+	public static String releaseRoomID(String serverName, String roomName, boolean approved)
+	{
+		JSONObject jb = new JSONObject();
+		jb.put("type", "releaseroomid");
+		jb.put("serverid", serverName);
+		jb.put("roomid", roomName);
+		jb.put("approved", approved ? "true" : "false");
 		return jb.toJSONString();
 	}
 
@@ -69,14 +90,25 @@ public class JsonOperator
 		return result.toJSONString();
 	}
 
-	public static String responseLockIdentity(String clientName, String serverName,
-			boolean approved)
+	public static String responseLockIdentity(String clientName, String serverName, boolean locked)
 	{
 		JSONObject jb = new JSONObject();
 		jb.put("type", "lockidentity");
 		jb.put("serverid", serverName);
 		jb.put("identity", clientName);
-		jb.put("locked", approved ? "true" : "false");
+		jb.put("locked", locked ? "true" : "false");
+		return jb.toJSONString();
+	}
+
+	// {"type" : "lockroomid", "serverid" : "s2", "roomid" : "jokes", "locked" :
+	// "false"}
+	public static String responseLockRoom(String roomName, String serverName, boolean locked)
+	{
+		JSONObject jb = new JSONObject();
+		jb.put("type", "lockroomid");
+		jb.put("serverid", serverName);
+		jb.put("roomid", roomName);
+		jb.put("locked", locked ? "true" : "false");
 		return jb.toJSONString();
 	}
 
@@ -109,6 +141,16 @@ public class JsonOperator
 		jb.put("roomid", roomName);
 		jb.put("identities", clientsInRoom);
 		jb.put("owner", roomOnwer);
+		return jb.toJSONString();
+	}
+
+	// {"type" : "createroom", "roomid" : "jokes", "approved" : "false"}
+	public static String createRoom(String roomName, boolean approved)
+	{
+		JSONObject jb = new JSONObject();
+		jb.put("type", "createroom");
+		jb.put("roomid", roomName);
+		jb.put("approved", approved ? "true" : "false");
 		return jb.toJSONString();
 	}
 

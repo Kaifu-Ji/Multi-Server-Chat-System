@@ -14,6 +14,8 @@ public class test
 	public static void main(String[] args) throws IOException
 	{
 		ArrayList<String> a = new ArrayList<>();
+		
+		System.out.println(a.hashCode());
 		a.add("sss");
 		a.add("ddd");
 		String [] t = new String[1];
@@ -26,7 +28,8 @@ public class test
 		for (String string : t)
 		{
 			System.out.println(string);
-		}
+		}System.out.println("sss".hashCode());
+		System.out.println(a.hashCode());
 	}
 
 }

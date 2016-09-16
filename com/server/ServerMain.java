@@ -56,7 +56,7 @@ public class ServerMain
 		}
 		ServerManager.getInstance().setMyname(serverName);
 		configReader.close();
-		RoomManager.getInstance().createRoom("MainHall-" + serverName,"#"+serverName);
+		RoomManager.getInstance().createRoom("MainHall-" + serverName,"");
 	}
 
 }

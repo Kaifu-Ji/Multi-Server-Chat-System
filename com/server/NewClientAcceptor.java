@@ -8,27 +8,16 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.json.simple.parser.ParseException;
 
 public class NewClientAcceptor extends Thread
 {
 	int port;
-	Pattern nameRule;
 	volatile boolean stop = false;
 
 	public NewClientAcceptor(int port)
 	{
 		this.port = port;
-		nameRule = Pattern.compile("^[a-zA-z]\\w{2,15}$");
-	}
-
-	private boolean nameCheck(String name)
-	{
-		Matcher m = nameRule.matcher(name);
-		return m.find();
 	}
 
 	@Override
@@ -95,7 +84,7 @@ public class NewClientAcceptor extends Thread
 	{
 		BufferedWriter clientWriter = new BufferedWriter(
 				new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
-		if (ClientManager.getInstance().nameExist(name) || (!nameCheck(name)))
+		if (ClientManager.getInstance().nameExist(name) || (!NameChecker.nameCheck(name)))
 		{
 			System.out.println("unvalue name");
 			clientWriter.write(JsonOperator.responseNewIdentity(name, false));
@@ -104,7 +93,7 @@ public class NewClientAcceptor extends Thread
 			return;
 		}
 		ArrayList<ServerInfo> serverList = ServerManager.getInstance().getList();
-		String message = JsonOperator.lockMessage(name, ServerManager.getInstance().getMyName());
+		String message = JsonOperator.lockIdentity(name, ServerManager.getInstance().getMyName());
 		boolean approved = true;
 		ArrayList<Socket> socketList = new ArrayList<>();
 		for (ServerInfo serverInfo : serverList)

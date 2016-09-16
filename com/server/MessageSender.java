@@ -32,6 +32,7 @@ public class MessageSender extends Thread
 
 	void responseClient(ClientInfo client, String message)
 	{
+		System.out.println(message + "send to"+client.clientName);
 		client.write(message);
 	}
 }

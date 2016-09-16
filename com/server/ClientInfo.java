@@ -11,7 +11,7 @@ public class ClientInfo
 {
 	String clientName;
 	String room;
-	String RoomOnwed;
+	String roomOnwed;
 	Socket clientSocket;
 	BufferedWriter writer;
 	BufferedReader reader;
@@ -21,7 +21,7 @@ public class ClientInfo
 		super();
 		this.clientName = clientName;
 		this.room = room;
-		RoomOnwed = roomOnwed;
+		this.roomOnwed = roomOnwed;
 		this.clientSocket = clientSocket;
 		try
 		{
@@ -35,11 +35,11 @@ public class ClientInfo
 			e.printStackTrace();
 		}
 	}
-	
-//	public synchronized boolean readyToRead() throws IOException
-//	{
-//		return reader.ready();
-//	}
+
+	// public synchronized boolean readyToRead() throws IOException
+	// {
+	// return reader.ready();
+	// }
 	public synchronized String read() throws IOException
 	{
 		if (reader.ready())
@@ -48,6 +48,7 @@ public class ClientInfo
 		}
 		return null;
 	}
+
 	public void write(String message)
 	{
 		try
@@ -60,6 +61,13 @@ public class ClientInfo
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
+	}
+
+	public synchronized void createRoom(String roomName)
+	{
+		this.roomOnwed = roomName;
+		this.room = roomName;
+
 	}
 }

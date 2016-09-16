@@ -73,7 +73,7 @@ class SeverMessageResponsorThread extends Thread
 					if (approved)
 					{
 						ClientManager.getInstance().addLockName(clientName);
-						System.out.println("approved!");
+						System.out.println("new Identity approved!");
 					}
 					message = JsonOperator.responseLockIdentity(clientName,
 							ServerManager.getInstance().getMyName(), approved);
@@ -84,6 +84,30 @@ class SeverMessageResponsorThread extends Thread
 				case "releaseidentity":
 					clientName = jsonOperator.get("identity");
 					ClientManager.getInstance().removeLockName(clientName);
+					stop = true;
+					break;
+				case "lockroomid":
+					String roomName = jsonOperator.get("roomid");
+					approved = !RoomManager.getInstance().roomExist(roomName);
+					if (approved)
+					{
+						RoomManager.getInstance().lockRoom(roomName);
+						System.out.println("new roomID approved");
+					}
+					message = JsonOperator.responseLockRoom(roomName,
+							ServerManager.getInstance().getMyName(), approved);
+					writer.write(message);
+					writer.newLine();
+					writer.flush();
+					break;
+				case "releaseroomid":
+					roomName = jsonOperator.get("roomid");
+					RoomManager.getInstance().removeLockRoom(roomName);
+					if(jsonOperator.get("approved").equals("true"))
+					{
+						String remoteServer = jsonOperator.get("serverid");
+						RoomManager.getInstance().addRemoteRoom(roomName, remoteServer);
+					}
 					stop = true;
 					break;
 				default:
