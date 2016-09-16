@@ -19,15 +19,15 @@ public class ServerMain
 
 	public static void main(String[] args) throws IOException
 	{
-		ServerMain serverMain = new ServerMain("s1", 1);
+		ServerMain serverMain = new ServerMain("s2", 1);
 		serverMain.setup();
 		serverMain.work();
 	}
 
 	private void work()
 	{
-		new NewClientAcceptor(4444).start();
-		new SeverMessageResponsorMain(5555).start();
+		new NewClientAcceptor(4445).start();
+		new SeverMessageResponsorMain(5556).start();
 		new ClientMessageReader().start();
 		new ClientMessageProcessor().start();
 	}

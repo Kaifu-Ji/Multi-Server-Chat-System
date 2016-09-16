@@ -27,19 +27,20 @@ public class RoomManager
 		}
 		return instance;
 	}
-	public RoomInfo getRoom(String roomName)
+
+	public synchronized RoomInfo getRoom(String roomName)
 	{
 		return roomList.get(roomName);
 	}
-	
+
 	public void lockRoom(String roomName)
 	{
-		synchronized(lockRoom)
+		synchronized (lockRoom)
 		{
 			lockRoom.add(roomName);
 		}
 	}
-	
+
 	public void removeLockRoom(String roomName)
 	{
 		synchronized (lockRoom)
@@ -56,23 +57,27 @@ public class RoomManager
 		}
 		synchronized (remoteRooms)
 		{
-			remoteRooms.put(remoteServer, remoteServer);
+			remoteRooms.put(roomName, remoteServer);
 		}
 	}
 
-	public void joinRoom(String clientName, String roomName)
+	public synchronized void joinRoom(String clientName, String roomName)
 	{
 		RoomInfo room;
-		synchronized (roomList)
-		{
-			room = roomList.get(roomName);
-		}
+		room = roomList.get(roomName);
 		room.addClient(clientName);
 	}
 
-	public void createRoom(String roomName,String roomOwner)
+	public synchronized void leaveRoom(String clientName, String roomName)
 	{
-		RoomInfo room = new RoomInfo(roomName,roomOwner);
+		RoomInfo room;
+		room = roomList.get(roomName);
+		room.deleteClient(clientName);
+	}
+
+	public void createRoom(String roomName, String roomOwner)
+	{
+		RoomInfo room = new RoomInfo(roomName, roomOwner);
 		synchronized (roomList)
 		{
 			roomList.put(roomName, room);
@@ -82,10 +87,12 @@ public class RoomManager
 			roomNames.add(roomName);
 		}
 	}
+
 	public boolean roomExist(String roomName)
 	{
-		return (roomList.containsKey(roomName)||lockRoom.contains(roomName));
+		return (roomList.containsKey(roomName) || lockRoom.contains(roomName));
 	}
+	
 
 	public String[] roomList()
 	{
@@ -93,6 +100,19 @@ public class RoomManager
 		synchronized (roomNames)
 		{
 			return roomNames.toArray(result);
+		}
+	}
+	
+	public String hasRoom(String roomName)
+	{
+		synchronized (roomList)
+		{
+			if(roomList.containsKey(roomName))
+				return ServerManager.getInstance().getMyName();
+		}
+		synchronized (remoteRooms)
+		{
+			return remoteRooms.get(roomName);
 		}
 	}
 }

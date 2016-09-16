@@ -153,5 +153,25 @@ public class JsonOperator
 		jb.put("approved", approved ? "true" : "false");
 		return jb.toJSONString();
 	}
+	public static String routeToOtherServer(String roomName,String serverName)
+	{
+		ServerInfo routeServer = ServerManager.getInstance().getServer(serverName);
+		JSONObject jb = new JSONObject();
+		jb.put("type", "route");
+		jb.put("roomid", roomName);
+		jb.put("host", routeServer.address);
+		jb.put("port", routeServer.portForClient+"");
+		return jb.toJSONString();
+	}
+
+	public static String serverChange(String myName)
+	{
+		JSONObject jb = new JSONObject();
+		jb.put("type", "serverchange");
+		jb.put("approved", "true");
+		jb.put("serverid", myName);
+		return jb.toJSONString();
+	}
+	
 
 }

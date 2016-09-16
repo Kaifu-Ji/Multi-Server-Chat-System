@@ -34,6 +34,10 @@ public class ClientMessageProcessor extends Thread
 				case "createroom":
 					createRoom(message);
 					break;
+				case "join":
+					joinRoom(message);
+					break;
+				case"":
 				default:
 					break;
 				}
@@ -43,6 +47,37 @@ public class ClientMessageProcessor extends Thread
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void joinRoom(Message message)
+	{
+		String clientName = message.identity;
+		String roomName = message.jsonOperator.get("roomid");
+		String currentRoom = ClientManager.getInstance().getClient(clientName).room;
+		String serverName =  RoomManager.getInstance().hasRoom(roomName);
+		if(serverName == null)
+		{
+			String messageSend = JsonOperator.roomChange(clientName, currentRoom, currentRoom);
+			new MessageSender("response", messageSend, roomName, clientName).start();;
+			return;
+		}
+		if(serverName.equals(ServerManager.getInstance().getMyName()))
+		{
+			String messageSend = JsonOperator.roomChange(clientName, currentRoom, roomName);
+			new MessageSender("roomBroadcast", messageSend, currentRoom, clientName).start();
+			new MessageSender("response", messageSend, roomName, clientName).start();
+			RoomManager.getInstance().leaveRoom(clientName, currentRoom);
+			RoomManager.getInstance().joinRoom(clientName, roomName);
+			ClientInfo client = ClientManager.getInstance().getClient(clientName);
+			client.changeRoom(roomName);
+			return;
+		}
+		String messageSend = JsonOperator.roomChange(clientName, currentRoom, roomName);
+		new MessageSender("roomBroadcast", messageSend, currentRoom, clientName).start();
+		messageSend = JsonOperator.routeToOtherServer(roomName, serverName);
+		new MessageSender("response", messageSend, roomName, clientName).start();
+		RoomManager.getInstance().leaveRoom(clientName, currentRoom);
+		ClientManager.getInstance().removeClient(clientName);
 	}
 
 	private void createRoom(Message message)
@@ -92,14 +127,16 @@ public class ClientMessageProcessor extends Thread
 			new MessageSender("response", messageSend, null, roomOwner).start();
 			if (approved)
 			{
-				RoomManager.getInstance().createRoom(roomName, roomOwner);
-				RoomManager.getInstance().joinRoom(roomOwner, roomName);
 				ClientInfo client = ClientManager.getInstance().getClient(roomOwner);
 				String roomPast = client.room;
-				client.createRoom(roomName);
 				messageSend = JsonOperator.roomChange(roomOwner, roomPast, roomName);
+				new MessageSender("roomBroadcast", messageSend, roomPast, roomOwner).start();
+				new MessageSender("response", messageSend, roomName, roomOwner).start();
+				RoomManager.getInstance().createRoom(roomName, roomOwner);
+				RoomManager.getInstance().leaveRoom(roomOwner, roomPast);
+				RoomManager.getInstance().joinRoom(roomOwner, roomName);
+				client.createRoom(roomName);
 				System.out.println("create room successful");
-				new MessageSender("response", messageSend, null, roomOwner).start();
 			}
 		} catch (Exception e)
 		{
@@ -112,19 +149,19 @@ public class ClientMessageProcessor extends Thread
 		ClientInfo clientInfo = ClientManager.getInstance().getClient(m.identity);
 		RoomInfo room = RoomManager.getInstance().getRoom(clientInfo.room);
 		String messageSend = JsonOperator.who(room.listClients(), room.roomName, room.roomOwner);
-		new MessageSender("response", messageSend, null, m.identity).run();
+		new MessageSender("response", messageSend, null, m.identity).start();
 	}
 
 	private void list(Message m)
 	{
 		String messageSend = JsonOperator.constructList(RoomManager.getInstance().roomList());
-		new MessageSender("response", messageSend, null, m.identity).run();
+		new MessageSender("response", messageSend, null, m.identity).start();
 	}
 
 	private void quit(Message m)
 	{
 		String messageSend = JsonOperator.roomChange(m.identity,
 				ClientManager.getInstance().getClient(m.identity).room, "");
-		new MessageSender("response", messageSend, null, m.identity).run();
+		new MessageSender("response", messageSend, null, m.identity).start();
 	}
 }

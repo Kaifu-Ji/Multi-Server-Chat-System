@@ -35,4 +35,15 @@ public class ServerManager
 	{
 		return myname;
 	}
+	public synchronized ServerInfo getServer(String serverName)
+	{
+		for (ServerInfo serverInfo : serverList)
+		{
+			if(serverInfo.serverName.equals(serverName))
+			{
+				return serverInfo;
+			}
+		}
+		return null;
+	}
 }

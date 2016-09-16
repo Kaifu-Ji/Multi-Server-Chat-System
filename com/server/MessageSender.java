@@ -24,7 +24,9 @@ public class MessageSender extends Thread
 		case "response":
 			responseClient(client, message);
 			break;
-
+		case "roomBroadcast":
+			broadcastInRoom(roomName, message,client.clientName);
+			break;
 		default:
 			break;
 		}
@@ -34,5 +36,22 @@ public class MessageSender extends Thread
 	{
 		System.out.println(message + "send to"+client.clientName);
 		client.write(message);
+	}
+	void broadcastInRoom(String roomName,String message,String clientName)
+	{
+		String clients[];
+		RoomInfo room = RoomManager.getInstance().getRoom(roomName);
+		synchronized (room)
+		{
+			clients = room.listClients();
+		}
+		for (String client : clients)
+		{
+			if(client!= null &&!client.equals(clientName))
+			{
+				ClientManager.getInstance().getClient(client).write(message);
+			}
+		}
+		
 	}
 }

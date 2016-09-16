@@ -68,6 +68,11 @@ public class ClientInfo
 	{
 		this.roomOnwed = roomName;
 		this.room = roomName;
-
 	}
+	
+	public synchronized void changeRoom(String roomName)
+	{
+		this.room = roomName;
+	}
+	
 }

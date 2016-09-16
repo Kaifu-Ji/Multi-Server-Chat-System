@@ -28,6 +28,13 @@ public class ClientManager
 		clientList.put(clientname, client);
 		clientNames.add(clientname);
 	}
+	
+	public synchronized void removeClient(String clientName)
+	{
+		clientList.remove(clientName);
+		clientNames.remove(clientName);
+	}
+	
 	public synchronized boolean nameExist(String name)
 	{
 		return (clientList.containsKey(name)||lockList.contains(name));

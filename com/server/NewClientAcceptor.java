@@ -31,18 +31,19 @@ public class NewClientAcceptor extends Thread
 			while (!stop)
 			{
 				clientSocket = serverSocket.accept();
-				System.out.println(ServerManager.getInstance().myname+"accept a new client");
+				System.out.println(ServerManager.getInstance().myname + "accept a new client");
 				BufferedReader reader = new BufferedReader(
 						new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
-				String message = reader.readLine();
-				JsonOperator jsonOperator = new JsonOperator(message);
-				String name = jsonOperator.get("identity");
-				switch (jsonOperator.getType())
+				String firstContact = reader.readLine();
+				Message message = new Message(firstContact, "");
+				String name = message.jsonOperator.get("identity");
+				switch (message.jsonOperator.getType())
 				{
 				case "newidentity":
 					newIdentity(clientSocket, name);
 					break;
-
+				case "movejoin":
+					moveJoin(clientSocket, message);
 				default:
 					break;
 				}
@@ -78,6 +79,26 @@ public class NewClientAcceptor extends Thread
 				}
 			}
 		}
+	}
+
+	private void moveJoin(Socket clientSocket, Message message)
+	{
+		String clientName = message.jsonOperator.get("identity");
+		String roomName = message.jsonOperator.get("roomid");
+		String fromRoom = message.jsonOperator.get("former");
+		if (!RoomManager.getInstance().hasRoom(roomName)
+				.equals(ServerManager.getInstance().getMyName()))
+		{
+			roomName = "MainHall-" + ServerManager.getInstance().getMyName();
+		}
+		ClientInfo newClient = new ClientInfo(clientName, roomName, null, clientSocket);
+		ClientManager.getInstance().addClient(clientName, newClient);
+		RoomManager.getInstance().joinRoom(clientName, roomName);
+		String messageSend = JsonOperator.serverChange(ServerManager.getInstance().getMyName());
+		new MessageSender("response", messageSend, "", clientName).start();
+		messageSend = JsonOperator.roomChange(clientName, fromRoom, roomName);
+		new MessageSender("roomBroadcast", messageSend, roomName, clientName).start();
+		new MessageSender("response", messageSend, "", clientName).start();
 	}
 
 	private void newIdentity(Socket clientSocket, String name) throws IOException, ParseException
@@ -127,14 +148,16 @@ public class NewClientAcceptor extends Thread
 		if (approved)
 		{
 			String mainRoom = "MainHall-" + ServerManager.getInstance().getMyName();
-			ClientInfo newClient = new ClientInfo(name,
-					mainRoom, null, clientSocket);
+			String messageSend = JsonOperator.roomChange(name, "", mainRoom);
+			ClientInfo newClient = new ClientInfo(name, mainRoom, null, clientSocket);
 			ClientManager.getInstance().addClient(name, newClient);
+			new MessageSender("roomBroadcast", messageSend, mainRoom, name).start();
 			RoomManager.getInstance().joinRoom(name, mainRoom);
-			clientWriter.write(JsonOperator.roomChange(name,"", mainRoom));
+			clientWriter.write(messageSend);
 			clientWriter.newLine();
 			clientWriter.flush();
-		}else {
+		} else
+		{
 			clientWriter.close();
 			clientSocket.close();
 		}

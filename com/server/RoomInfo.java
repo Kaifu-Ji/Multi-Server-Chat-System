@@ -8,7 +8,7 @@ public class RoomInfo
 	ArrayList<String> clientsInRoom;
 	String roomOwner;
 
-	public RoomInfo(String roomName,String roomOwner)
+	public RoomInfo(String roomName, String roomOwner)
 	{
 		super();
 		this.roomName = roomName;
@@ -20,6 +20,21 @@ public class RoomInfo
 	{
 		clientsInRoom.add(clientName);
 	}
+
+	public synchronized void deleteClient(String clientName)
+	{
+
+		// for (String string : clientsInRoom)
+		// {
+		// System.out.println(string);
+		// }
+		clientsInRoom.remove(clientName);
+		// for (String string : clientsInRoom)
+		// {
+		// System.out.println(string);
+		// }
+	}
+
 	public String[] listClients()
 	{
 		String[] result = new String[1];
